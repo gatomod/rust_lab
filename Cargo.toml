@@ -1,0 +1,12 @@
+# Workspace members
+[workspace]
+members = [
+    "shannon"
+]
+resolver = "2"
+
+[workspace.dependencies]
+
+# Common dependencies
+#tokio = { version = "1", features = ["full"] }
+#anyhow = "1"

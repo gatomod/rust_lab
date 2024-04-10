@@ -8,35 +8,68 @@ fn main() -> io::Result<()> {
     for file in file_set {
         let path = file?.path();
 
-        if path.is_file() {
-            huffman(path)?;
+        if path.ends_with("song.txt") {
+            let data = fs::read(&path)?;
+            huffman(data)?;
         }
     }
 
     Ok(())
 }
 
-fn huffman(path: std::path::PathBuf) -> Result<(), io::Error> {
-    // This code is too similar to Shannon
+#[derive(Debug)]
+struct Leaf {
+    freq: u64,
+    val: u8,
+}
 
-    // Read file and split by word
-    let data = fs::read(&path)?;
+#[derive(Debug)]
+struct Branch<'a> {
+    freq: u64,
+    a: Box<&'a Leaf>,
+    b: Box<&'a Leaf>,
+}
 
-    let words: Vec<String> = String::from_utf8_lossy(&data)
-        .split_whitespace()
-        .map(|x| x.to_string())
-        .collect();
+#[derive(Debug)]
+enum Tree<'a> {
+    Leaf(Leaf),
+    Branch(Branch<'a>),
+}
 
+trait TreeFrequency {
+    fn get_freq(&self) -> u64;
+}
+
+impl<'a> TreeFrequency for Tree<'a> {
+    fn get_freq(&self) -> u64 {
+        match self {
+            Tree::Leaf(x) => x.freq,
+            Tree::Branch(x) => x.freq,
+        }
+    }
+}
+
+fn huffman(data: Vec<u8>) -> Result<(), io::Error> {
     // HashMap with word and counter
-    let mut prev_dict: HashMap<String, u64> = HashMap::new();
+    let mut prev_dict: HashMap<u8, u64> = HashMap::new();
 
-    for word in &words {
+    for word in &data {
         *prev_dict.entry(word.clone()).or_insert(0) += 1;
     }
 
-    let mut dict: Vec<(String, u64)> = prev_dict.into_iter().map(|x| x).collect();
+    // Create dictionary with all leaves and occurrences
+    let mut dict: Vec<Leaf> = prev_dict
+        .into_iter()
+        .map(|(val, freq)| Leaf { freq, val })
+        .collect();
 
-    dict.sort_by(|(_, a), (_, b)| b.cmp(a));
+    let mut 
+
+    dict.sort_by(|a, b| b.freq.cmp(&a.freq));
+
+    for i in dict {
+        println!("{:?}", i);
+    }
 
     Ok(())
 }

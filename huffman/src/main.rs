@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
+use std::fmt::{Debug, Display};
 use std::time::Instant;
 use std::{fs, io};
 
@@ -9,9 +10,9 @@ fn main() -> io::Result<()> {
     for file in file_set {
         let path = file?.path();
 
-        if path.ends_with("wallpaper.raw") {
-            let data = fs::read(&path)?;
-            huffman(data)?;
+        if path.ends_with("_lake.raw") {
+            let mut data = fs::read(&path)?;
+            huffman(&mut data)?;
         }
     }
 
@@ -19,48 +20,40 @@ fn main() -> io::Result<()> {
 }
 
 #[derive(Debug)]
-struct Leaf {
+struct Node<T> {
     freq: u64,
-    val: Option<u8>,
+    val: Option<T>,
 }
 
-fn huffman(data: Vec<u8>) -> Result<(), io::Error> {
+type DataType = u8;
+
+fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
+    println!("{}", data.len());
     println!("BENCH > Start");
     // Start of simple benchmark
     let bench = Instant::now();
 
-    // TODO find an efficient way to collect data, this takes 3 seconds with large datasets
+    let mut dict = occurrences(data);
 
-    // HashMap with word and counter
-    /* let mut occurrences: Vec<(u8, u64)> = Vec::new();
+    // Try with HashMap
+    // let mut map: HashMap<DataType, u64> = HashMap::new();
 
-    'word: for word in &data {
-        for (val, mut oc) in &mut occurrences {
-            if word == val {
-                oc += 1;
-                continue 'word;
-            }
-        }
+    // Try with
+    /* let mut map: BTreeMap<DataType, u64> = BTreeMap::new();
 
-        occurrences.push((*word, 1))
-    } */
+    for word in data {
+        *map.entry(word.clone()).or_insert(0) += 1;
+    }
 
-    /* let mut prev_dict: HashMap<u8, u64> = HashMap::new();
+    println!("BENCH > Add entries with hashmap: {:?}", bench.elapsed());
 
-    for word in &data {
-        *prev_dict.entry(word.clone()).or_insert(0) += 1;
-    } */
-
-    println!("BENCH > Add entries: {:?}", bench.elapsed());
-
-    // Create dictionary with all leaves and occurrences
-    let mut dict: Vec<Leaf> = occurrences
+    let mut dict: Vec<Node<DataType>> = map
         .into_iter()
-        .map(|(val, freq)| Leaf {
+        .map(|(val, freq)| Node {
             freq,
             val: Some(val),
         })
-        .collect();
+        .collect(); */
 
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
 
@@ -69,9 +62,9 @@ fn huffman(data: Vec<u8>) -> Result<(), io::Error> {
     println!("BENCH > Sorted: {:?}", bench.elapsed());
     // let mut dict = dict.into();
 
-    let first = dict.first().unwrap();
+    /* let first = dict.first().unwrap();
 
-    let branches: Vec<Leaf> = Vec::with_capacity(dict.len() - 1);
+    let branches: Vec<Node<DataType>> = Vec::with_capacity(dict.len() - 1); */
 
     /* for i in &dict {
         println!("{:?}", i);
@@ -80,4 +73,38 @@ fn huffman(data: Vec<u8>) -> Result<(), io::Error> {
     println!("BENCH > End with: {:?}", bench.elapsed());
 
     Ok(())
+}
+
+// This SUCKS
+fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<Node<T>> {
+    let mut dict: Vec<Node<T>> = Vec::new();
+
+    let mut i = 0;
+    while !data.is_empty() {
+        let bench = Instant::now();
+        let el = data.pop().unwrap();
+
+        let mut exists = false;
+
+        if let Some(dict_val) = dict.iter_mut().find(|x| x.val == Some(el)) {
+            dict_val.freq += 1;
+            exists = true;
+        } else {
+            let node = Node {
+                freq: 1,
+                val: Some(el.clone()),
+            };
+
+            dict.push(node);
+        }
+
+        i += 1;
+        if i % 1_000_000 == 0 {
+            println!("Element: {} - Exists: {}", el, exists);
+
+            println!("BENCH > Loop {} with: {:?}", i, bench.elapsed());
+        }
+    }
+
+    dict
 }

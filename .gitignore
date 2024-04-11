@@ -1,1 +1,7 @@
 target/
+
+# Files
+
+# File too large (almost 140 MB)
+# You can get it with ffmpeg -i lake.jpg -f rawvideo -pix_fmt rgba _lake.raw
+_lake.raw

@@ -9,6 +9,9 @@ This is a monorepo with projects that I make to test algorithms and other things
 -   **Shannon:** A simple Shannon entropy implementation
 -   **Huffman:** A Huffman tree generator
 
+## Ideas
+-   **Custom array:** An efficient keychain to insert values at any position and find it without iterating over each value like a junior
+
 ## Dataset
 
 All test data is available under the /data folder. There's a lot of garbage, like weird texts and images (with raw and encoded data). Don't take it personally.

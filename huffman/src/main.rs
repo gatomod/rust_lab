@@ -33,13 +33,13 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
     // Start of simple benchmark
     let bench = Instant::now();
 
-    let mut dict = occurrences(data);
+    // let mut dict = occurrences(data);
 
     // Try with HashMap
-    // let mut map: HashMap<DataType, u64> = HashMap::new();
+    let mut map: HashMap<DataType, u64> = HashMap::new();
 
     // Try with
-    /* let mut map: BTreeMap<DataType, u64> = BTreeMap::new();
+    // let mut map: BTreeMap<DataType, u64> = BTreeMap::new();
 
     for word in data {
         *map.entry(word.clone()).or_insert(0) += 1;
@@ -53,7 +53,7 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
             freq,
             val: Some(val),
         })
-        .collect(); */
+        .collect();
 
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
 
@@ -79,16 +79,11 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
 fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<Node<T>> {
     let mut dict: Vec<Node<T>> = Vec::new();
 
-    let mut i = 0;
     while !data.is_empty() {
-        let bench = Instant::now();
         let el = data.pop().unwrap();
-
-        let mut exists = false;
 
         if let Some(dict_val) = dict.iter_mut().find(|x| x.val == Some(el)) {
             dict_val.freq += 1;
-            exists = true;
         } else {
             let node = Node {
                 freq: 1,
@@ -96,13 +91,6 @@ fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<
             };
 
             dict.push(node);
-        }
-
-        i += 1;
-        if i % 1_000_000 == 0 {
-            println!("Element: {} - Exists: {}", el, exists);
-
-            println!("BENCH > Loop {} with: {:?}", i, bench.elapsed());
         }
     }
 

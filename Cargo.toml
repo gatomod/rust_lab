@@ -1,6 +1,6 @@
 # Workspace members
 [workspace]
-members = [ "huffman",
+members = [ "custom_array", "huffman",
     "shannon"
 ]
 resolver = "2"

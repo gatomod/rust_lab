@@ -8,9 +8,7 @@ This is a monorepo with projects that I make to test algorithms and other things
 
 -   **Shannon:** A simple Shannon entropy implementation
 -   **Huffman:** A Huffman tree generator
-
-## Ideas
--   **Custom array:** An efficient keychain to insert values at any position and find it without iterating over each value like a junior
+-   **Custom array:** An efficient "keychain" to insert values at any position and find values without iterating like a junior
 
 ## Dataset
 
@@ -28,4 +26,4 @@ An implementation of the Huffman coding and tree generator with efficient datase
 
 Collecting data and probability of appearance is too inefficient with large data. Currently I'm using a hashmap because is easy to check if the entry is present in the list. Hashmap is too slow, but still faster than using a vector with an iterator that loops the dataset for each entry. I should create a custom binary tree that can find and store data efficiently.
 
-*Gátomo - The 3-Clause BSD License*
+_Gátomo - The 3-Clause BSD License_

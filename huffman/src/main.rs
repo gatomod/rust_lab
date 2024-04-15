@@ -10,7 +10,7 @@ fn main() -> io::Result<()> {
     for file in file_set {
         let path = file?.path();
 
-        if path.ends_with("_lake.raw") {
+        if path.ends_with("wallpaper.raw") {
             let mut data = fs::read(&path)?;
             huffman(&mut data)?;
         }
@@ -76,7 +76,7 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
 }
 
 // This SUCKS
-fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<Node<T>> {
+/* fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<Node<T>> {
     let mut dict: Vec<Node<T>> = Vec::new();
 
     while !data.is_empty() {
@@ -95,4 +95,4 @@ fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<
     }
 
     dict
-}
+} */

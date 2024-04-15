@@ -1,5 +1,8 @@
+use std::borrow::{Borrow, BorrowMut};
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
 use std::fmt::{Debug, Display};
+use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 use std::time::Instant;
 use std::{fs, io};
 
@@ -22,7 +25,7 @@ fn main() -> io::Result<()> {
 #[derive(Debug)]
 struct Node<T> {
     freq: u64,
-    val: Option<T>,
+    val: Box<Option<T>>,
 }
 
 type DataType = u8;
@@ -33,10 +36,10 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
     // Start of simple benchmark
     let bench = Instant::now();
 
-    // let mut dict = occurrences(data);
+    let mut dict = occurrences(data);
 
     // Try with HashMap
-    let mut map: HashMap<DataType, u64> = HashMap::new();
+    /* let mut map: HashMap<DataType, u64> = HashMap::new();
 
     // Try with
     // let mut map: BTreeMap<DataType, u64> = BTreeMap::new();
@@ -53,7 +56,7 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
             freq,
             val: Some(val),
         })
-        .collect();
+        .collect(); */
 
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
 
@@ -66,33 +69,39 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
 
     let branches: Vec<Node<DataType>> = Vec::with_capacity(dict.len() - 1); */
 
-    /* for i in &dict {
+    for i in &dict {
         println!("{:?}", i);
-    } */
+    }
 
     println!("BENCH > End with: {:?}", bench.elapsed());
 
     Ok(())
 }
 
-// This SUCKS
-/* fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &mut Vec<T>) -> Vec<Node<T>> {
-    let mut dict: Vec<Node<T>> = Vec::new();
+// what tf is this kill me
+fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &Vec<T>) -> Vec<Node<T>> {
+    let base: Box<Vec<Box<Option<T>>>> =
+        Box::new(data.into_iter().map(|x| Box::new(Some(*x))).collect());
 
-    while !data.is_empty() {
-        let el = data.pop().unwrap();
+    let mut collected: Vec<Node<T>> = Vec::new();
 
-        if let Some(dict_val) = dict.iter_mut().find(|x| x.val == Some(el)) {
-            dict_val.freq += 1;
-        } else {
-            let node = Node {
-                freq: 1,
-                val: Some(el.clone()),
-            };
+    let mut index = 0usize;
+    let base_len = base.len();
 
-            dict.push(node);
+    for query in &*base {
+        for element_index in index..base_len {
+            if let Some(mut boxed_val) = base.clone().get_mut(element_index) {
+                collected.push(Node {
+                    freq: 1,
+                    val: boxed_val.clone(),
+                });
+
+                boxed_val = &mut Box::new(None);
+            }
         }
+
+        index += 1;
     }
 
-    dict
-} */
+    collected
+}

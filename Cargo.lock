@@ -3,6 +3,10 @@
 version = 3
 
 [[package]]
+name = "custom_array"
+version = "0.1.0"
+
+[[package]]
 name = "huffman"
 version = "0.1.0"
 

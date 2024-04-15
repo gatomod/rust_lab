@@ -16,8 +16,6 @@
 | HashMap         | 1.6845175s |
 | BTreeMap        | 2.171861s  |
 
-
-
 Broma no?
 
 > Read https://blog.stackademic.com/how-to-calculate-big-o-notation-time-complexity-5504bed8d292

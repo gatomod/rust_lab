@@ -4,11 +4,13 @@ Testing with Rust
 
 This is a monorepo with projects that I make to test algorithms and other things in Rust.
 
+## Contributors
+Thanks to my cat for helping me reviewing the code and stepping on the keyboard while I wasn't at my desk.
+
 ## Crates
 
 -   **Shannon:** A simple Shannon entropy implementation
 -   **Huffman:** A Huffman tree generator
--   **Custom array:** An efficient "keychain" to insert values at any position and find values without iterating like a junior
 
 ## Dataset
 

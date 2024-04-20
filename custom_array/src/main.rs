@@ -10,6 +10,11 @@ struct Node<T: Ord + Eq> {
 fn main() -> io::Result<()> {
     // Read directory
     let file_set = fs::read_dir("data/img")?;
+    let larbv = Box::new("mosca");
+
+    let xd = larbv.as_ptr();
+
+    println!("{:?}", xd);
 
     for file in file_set {
         let path = file?.path();
@@ -29,7 +34,7 @@ fn arr(buf: &mut Vec<u8>) {
     // Start of simple benchmark
     let bench = Instant::now();
 
-    let mut leaves: Vec<Node<u8>> = Vec::new();
+    let mut tree: Vec<Node<u8>> = Vec::new();
 
     for i in buf {}
 

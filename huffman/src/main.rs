@@ -1,10 +1,14 @@
 use std::borrow::{Borrow, BorrowMut};
-use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
+use std::collections::{BinaryHeap, HashMap};
 use std::fmt::{Debug, Display};
+use std::io::Read;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Instant;
 use std::{fs, io};
+
+use rayon::prelude::*;
 
 fn main() -> io::Result<()> {
     // Read directory
@@ -13,7 +17,7 @@ fn main() -> io::Result<()> {
     for file in file_set {
         let path = file?.path();
 
-        if path.ends_with("wallpaper.raw") {
+        if path.ends_with("_lake.raw") {
             let mut data = fs::read(&path)?;
             huffman(&mut data)?;
         }
@@ -22,86 +26,36 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-#[derive(Debug)]
-struct Node<T> {
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+struct Node<T: Ord> {
     freq: u64,
-    val: Box<Option<T>>,
+    val: Option<T>,
 }
 
-type DataType = u8;
+type DataType = u32;
 
 fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
-    println!("{}", data.len());
     println!("BENCH > Start");
-    // Start of simple benchmark
     let bench = Instant::now();
 
-    let mut dict = occurrences(data);
+    let mut map = Arc::new(HashMap::<DataType, u64>::new());
 
-    // Try with HashMap
-    /* let mut map: HashMap<DataType, u64> = HashMap::new();
+    let data: Vec<DataType> = data
+        .par_chunks(4)
+        .into_par_iter()
+        .map(|x| DataType::from_be_bytes([x[0], x[1], x[2], x[3]]))
+        .collect();
 
-    // Try with
-    // let mut map: BTreeMap<DataType, u64> = BTreeMap::new();
+    println!("BENCH > Data into u16: {:?}", bench.elapsed());
 
-    for word in data {
-        *map.entry(word.clone()).or_insert(0) += 1;
-    }
+    data.par_iter().for_each(|x| {
+        map.entry(*x).or_insert(0) += 1;
+    });
 
-    println!("BENCH > Add entries with hashmap: {:?}", bench.elapsed());
-
-    let mut dict: Vec<Node<DataType>> = map
-        .into_iter()
-        .map(|(val, freq)| Node {
-            freq,
-            val: Some(val),
-        })
-        .collect(); */
-
+    // *map.entry(word.clone()).or_insert(0) += 1;
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
-
-    dict.sort_by(|a, b| b.freq.cmp(&a.freq));
-
-    println!("BENCH > Sorted: {:?}", bench.elapsed());
-    // let mut dict = dict.into();
-
-    /* let first = dict.first().unwrap();
-
-    let branches: Vec<Node<DataType>> = Vec::with_capacity(dict.len() - 1); */
-
-    for i in &dict {
-        println!("{:?}", i);
-    }
 
     println!("BENCH > End with: {:?}", bench.elapsed());
 
     Ok(())
-}
-
-// what tf is this kill me
-fn occurrences<T: PartialEq + Copy + Display + Debug>(data: &Vec<T>) -> Vec<Node<T>> {
-    let base: Box<Vec<Box<Option<T>>>> =
-        Box::new(data.into_iter().map(|x| Box::new(Some(*x))).collect());
-
-    let mut collected: Vec<Node<T>> = Vec::new();
-
-    let mut index = 0usize;
-    let base_len = base.len();
-
-    for query in &*base {
-        for element_index in index..base_len {
-            if let Some(mut boxed_val) = base.clone().get_mut(element_index) {
-                collected.push(Node {
-                    freq: 1,
-                    val: boxed_val.clone(),
-                });
-
-                boxed_val = &mut Box::new(None);
-            }
-        }
-
-        index += 1;
-    }
-
-    collected
 }

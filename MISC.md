@@ -19,3 +19,10 @@
 Broma no?
 
 > Read https://blog.stackademic.com/how-to-calculate-big-o-notation-time-complexity-5504bed8d292
+
+#### Join chunks
+**\_lake.raw** (7.91 MB)
+| Method | Time         |
+| ------ | ------------ |
+| std    | 830.94769ms  |
+| rayon  | 143.320144ms |

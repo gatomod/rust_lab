@@ -7,7 +7,7 @@ fn main() -> io::Result<()> {
     for file in file_set {
         let path = file?.path();
 
-        if path.ends_with("wallpaper.raw") {
+        if path.ends_with("_lake.raw") {
             shannon(path)?;
         }
     }
@@ -52,7 +52,13 @@ fn shannon(path: std::path::PathBuf) -> Result<(), io::Error> {
         println!("{:<20}\t{}\t{:<22}%", word, count, prob);
     }
 
-    println!("\n{}\n- Entropy: {}", path.to_string_lossy(), entropy);
+    println!(
+        "\n{}\n- Entropy: {}\n- Data length: {}\n- Map length: {}",
+        path.to_string_lossy(),
+        entropy,
+        data.len(),
+        dict.len()
+    );
 
     Ok(())
 }

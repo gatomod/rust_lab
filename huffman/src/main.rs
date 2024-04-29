@@ -1,12 +1,8 @@
-use std::borrow::{Borrow, BorrowMut};
-use std::collections::{BinaryHeap, HashMap};
-use std::fmt::{Debug, Display};
-use std::io::Read;
-use std::ops::{Deref, DerefMut};
-use std::rc::Rc;
-use std::sync::Arc;
-use std::time::Instant;
-use std::{fs, io};
+use std::cell::Cell;
+use std::fmt::Debug;
+use std::sync::RwLock;
+use std::time::{Duration, Instant};
+use std::{fs, io, thread};
 
 use rayon::prelude::*;
 
@@ -33,12 +29,16 @@ struct Node<T: Ord> {
 }
 
 type DataType = u32;
+type CounterType = u32;
 
-fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
+fn huffman(data: &mut Vec<u8>) -> Result<(), io::Error> {
+    // This is inefficient sorry
+    let mut _map = RwLock::new(Vec::<Box<RwLock<CounterType>>>::with_capacity(
+        DataType::MAX as usize,
+    ));
+
     println!("BENCH > Start");
     let bench = Instant::now();
-
-    let mut map = Arc::new(HashMap::<DataType, u64>::new());
 
     let data: Vec<DataType> = data
         .par_chunks(4)
@@ -49,13 +49,31 @@ fn huffman(mut data: &mut Vec<u8>) -> Result<(), io::Error> {
     println!("BENCH > Data into u16: {:?}", bench.elapsed());
 
     data.par_iter().for_each(|x| {
-        map.entry(*x).or_insert(0) += 1;
+        /* *_map
+        .get(*x as usize)
+        .unwrap_or(&Box::new(RwLock::new(0)))
+        .write()
+        .unwrap() += 1; */
+
+        match _map.read().unwrap().get(*x as usize) {
+            Some(v) => *v.write().unwrap() += 1,
+            None => _map
+                .write()
+                .unwrap()
+                .insert(*x as usize, Box::new(RwLock::new(1))),
+        }
+
+        println!("{}", x);
     });
 
     // *map.entry(word.clone()).or_insert(0) += 1;
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
 
+    println!("{:?}", _map.read());
+
     println!("BENCH > End with: {:?}", bench.elapsed());
+
+    thread::sleep(Duration::from_secs(100));
 
     Ok(())
 }

@@ -1,6 +1,6 @@
 use std::cell::Cell;
 use std::fmt::Debug;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 use std::{fs, io, thread};
 
@@ -32,13 +32,24 @@ type DataType = u32;
 type CounterType = u32;
 
 fn huffman(data: &mut Vec<u8>) -> Result<(), io::Error> {
-    // This is inefficient sorry
-    let mut _map = RwLock::new(Vec::<Box<RwLock<CounterType>>>::with_capacity(
-        DataType::MAX as usize,
-    ));
-
     println!("BENCH > Start");
     let bench = Instant::now();
+
+    // This is inefficient sorry
+    let mut _map = Arc::new(RwLock::new(Vec::<Box<CounterType>>::with_capacity(
+        DataType::MAX as usize,
+    )));
+
+    println!("BENCH > Initialize map: {:?}", bench.elapsed());
+
+    _map.write()
+        .unwrap()
+        .par_iter_mut()
+        .for_each(|x| *x = Box::new(0));
+
+    println!("BENCH > Fill map with zeroes: {:?}", bench.elapsed());
+
+    println!("{:?}", _map);
 
     let data: Vec<DataType> = data
         .par_chunks(4)
@@ -54,22 +65,15 @@ fn huffman(data: &mut Vec<u8>) -> Result<(), io::Error> {
         .unwrap_or(&Box::new(RwLock::new(0)))
         .write()
         .unwrap() += 1; */
-
-        match _map.read().unwrap().get(*x as usize) {
-            Some(v) => *v.write().unwrap() += 1,
-            None => _map
-                .write()
-                .unwrap()
-                .insert(*x as usize, Box::new(RwLock::new(1))),
+        if let Some(v) = _map.read().unwrap().get(*x as usize) {
+            *v += 1
         }
-
-        println!("{}", x);
     });
 
     // *map.entry(word.clone()).or_insert(0) += 1;
     println!("BENCH > Dictionary created: {:?}", bench.elapsed());
 
-    println!("{:?}", _map.read());
+    println!("{:?}", _map);
 
     println!("BENCH > End with: {:?}", bench.elapsed());
 
